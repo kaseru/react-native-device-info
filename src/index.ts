@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Dimensions, NativeEventEmitter, NativeModules, Platform } from 'react-native';
 import { useOnEvent, useOnMount } from './internal/asyncHookWrappers';
-import devicesWithDynamicIsland from "./internal/devicesWithDynamicIsland";
+import devicesWithDynamicIsland from './internal/devicesWithDynamicIsland';
 import devicesWithNotch from './internal/devicesWithNotch';
 import RNDeviceInfo from './internal/nativeInterface';
 import {
@@ -19,7 +19,7 @@ import type {
 
 export const [getUniqueId, getUniqueIdSync] = getSupportedPlatformInfoFunctions({
   memoKey: 'uniqueId',
-  supportedPlatforms: ['android', 'ios', 'windows'],
+  supportedPlatforms: ['android', 'ios', 'windows', 'macos'],
   getter: () => RNDeviceInfo.getUniqueId(),
   syncGetter: () => RNDeviceInfo.getUniqueIdSync(),
   defaultValue: 'unknown',
@@ -27,7 +27,7 @@ export const [getUniqueId, getUniqueIdSync] = getSupportedPlatformInfoFunctions(
 
 let uniqueId: string;
 export async function syncUniqueId() {
-  if (Platform.OS === 'ios') {
+  if (Platform.OS === 'ios' || Platform.OS === 'macos') {
     uniqueId = await RNDeviceInfo.syncUniqueId();
   } else {
     uniqueId = await getUniqueId();
@@ -60,14 +60,14 @@ export const [getAndroidId, getAndroidIdSync] = getSupportedPlatformInfoFunction
 });
 
 export const [getIpAddress, getIpAddressSync] = getSupportedPlatformInfoFunctions({
-  supportedPlatforms: ['android', 'ios', 'windows'],
+  supportedPlatforms: ['android', 'ios', 'windows', 'macos'],
   getter: () => RNDeviceInfo.getIpAddress(),
   syncGetter: () => RNDeviceInfo.getIpAddressSync(),
   defaultValue: 'unknown',
 });
 
 export const [isCameraPresent, isCameraPresentSync] = getSupportedPlatformInfoFunctions({
-  supportedPlatforms: ['android', 'windows', 'web'],
+  supportedPlatforms: ['android', 'windows', 'macos', 'web'],
   getter: () => RNDeviceInfo.isCameraPresent(),
   syncGetter: () => RNDeviceInfo.isCameraPresentSync(),
   defaultValue: false,
@@ -96,15 +96,20 @@ export const getDeviceId = () =>
     defaultValue: 'unknown',
     memoKey: 'deviceId',
     getter: () => RNDeviceInfo.deviceId,
-    supportedPlatforms: ['android', 'ios', 'windows'],
+    supportedPlatforms: ['android', 'ios', 'windows', 'macos'],
   });
 
 export const [getManufacturer, getManufacturerSync] = getSupportedPlatformInfoFunctions({
   memoKey: 'manufacturer',
-  supportedPlatforms: ['android', 'ios', 'windows'],
+  supportedPlatforms: ['android', 'ios', 'windows', 'macos'],
   getter: () =>
-    Platform.OS == 'ios' ? Promise.resolve('Apple') : RNDeviceInfo.getSystemManufacturer(),
-  syncGetter: () => (Platform.OS == 'ios' ? 'Apple' : RNDeviceInfo.getSystemManufacturerSync()),
+    Platform.OS === 'ios' || Platform.OS === 'macos'
+      ? Promise.resolve('Apple')
+      : RNDeviceInfo.getSystemManufacturer(),
+  syncGetter: () =>
+    Platform.OS === 'ios' || Platform.OS === 'macos'
+      ? 'Apple'
+      : RNDeviceInfo.getSystemManufacturerSync(),
   defaultValue: 'unknown',
 });
 
@@ -112,14 +117,14 @@ export const getModel = () =>
   getSupportedPlatformInfoSync({
     memoKey: 'model',
     defaultValue: 'unknown',
-    supportedPlatforms: ['ios', 'android', 'windows'],
+    supportedPlatforms: ['ios', 'android', 'windows', 'macos'],
     getter: () => RNDeviceInfo.model,
   });
 
 export const getBrand = () =>
   getSupportedPlatformInfoSync({
     memoKey: 'brand',
-    supportedPlatforms: ['android', 'ios', 'windows'],
+    supportedPlatforms: ['android', 'ios', 'windows', 'macos'],
     defaultValue: 'unknown',
     getter: () => RNDeviceInfo.brand,
   });
@@ -148,7 +153,7 @@ export const getSystemVersion = () =>
 
 export const [getBuildId, getBuildIdSync] = getSupportedPlatformInfoFunctions({
   memoKey: 'buildId',
-  supportedPlatforms: ['android', 'ios', 'windows'],
+  supportedPlatforms: ['android', 'ios', 'windows', 'macos'],
   getter: () => RNDeviceInfo.getBuildId(),
   syncGetter: () => RNDeviceInfo.getBuildIdSync(),
   defaultValue: 'unknown',
@@ -175,7 +180,7 @@ export const [
   getInstallerPackageNameSync,
 ] = getSupportedPlatformInfoFunctions({
   memoKey: 'installerPackageName',
-  supportedPlatforms: ['android', 'windows', 'ios'],
+  supportedPlatforms: ['android', 'windows', 'ios', 'macos'],
   getter: () => RNDeviceInfo.getInstallerPackageName(),
   syncGetter: () => RNDeviceInfo.getInstallerPackageNameSync(),
   defaultValue: 'unknown',
@@ -186,13 +191,13 @@ export const getApplicationName = () =>
     memoKey: 'appName',
     defaultValue: 'unknown',
     getter: () => RNDeviceInfo.appName,
-    supportedPlatforms: ['android', 'ios', 'windows'],
+    supportedPlatforms: ['android', 'ios', 'windows', 'macos'],
   });
 
 export const getBuildNumber = () =>
   getSupportedPlatformInfoSync({
     memoKey: 'buildNumber',
-    supportedPlatforms: ['android', 'ios', 'windows'],
+    supportedPlatforms: ['android', 'ios', 'windows', 'macos'],
     getter: () => RNDeviceInfo.buildNumber,
     defaultValue: 'unknown',
   });
@@ -210,7 +215,7 @@ export function getReadableVersion() {
 }
 
 export const [getDeviceName, getDeviceNameSync] = getSupportedPlatformInfoFunctions({
-  supportedPlatforms: ['android', 'ios', 'windows'],
+  supportedPlatforms: ['android', 'ios', 'windows', 'macos'],
   getter: () => RNDeviceInfo.getDeviceName(),
   syncGetter: () => RNDeviceInfo.getDeviceNameSync(),
   defaultValue: 'unknown',
@@ -320,7 +325,7 @@ export const [getType, getTypeSync] = getSupportedPlatformInfoFunctions({
 
 export const [getBaseOs, getBaseOsSync] = getSupportedPlatformInfoFunctions({
   memoKey: 'baseOs',
-  supportedPlatforms: ['android', 'web', 'windows'],
+  supportedPlatforms: ['android', 'web', 'windows', 'macos'],
   getter: () => RNDeviceInfo.getBaseOs(),
   syncGetter: () => RNDeviceInfo.getBaseOsSync(),
   defaultValue: 'unknown',
@@ -369,7 +374,7 @@ export const [isEmulator, isEmulatorSync] = getSupportedPlatformInfoFunctions({
 export const isTablet = () =>
   getSupportedPlatformInfoSync({
     defaultValue: false,
-    supportedPlatforms: ['android', 'ios', 'windows'],
+    supportedPlatforms: ['android', 'ios', 'windows', 'macos'],
     memoKey: 'tablet',
     getter: () => RNDeviceInfo.isTablet,
   });
@@ -384,7 +389,7 @@ export const isDisplayZoomed = () =>
 
 export const [isPinOrFingerprintSet, isPinOrFingerprintSetSync] = getSupportedPlatformInfoFunctions(
   {
-    supportedPlatforms: ['android', 'ios', 'windows'],
+    supportedPlatforms: ['android', 'ios', 'windows', 'macos'],
     getter: () => RNDeviceInfo.isPinOrFingerprintSet(),
     syncGetter: () => RNDeviceInfo.isPinOrFingerprintSetSync(),
     defaultValue: false,
@@ -475,7 +480,7 @@ export const [getCarrier, getCarrierSync] = getSupportedPlatformInfoFunctions({
 
 export const [getTotalMemory, getTotalMemorySync] = getSupportedPlatformInfoFunctions({
   memoKey: 'totalMemory',
-  supportedPlatforms: ['android', 'ios', 'windows', 'web'],
+  supportedPlatforms: ['android', 'ios', 'windows', 'macos', 'web'],
   getter: () => RNDeviceInfo.getTotalMemory(),
   syncGetter: () => RNDeviceInfo.getTotalMemorySync(),
   defaultValue: -1,
@@ -490,7 +495,7 @@ export const [getMaxMemory, getMaxMemorySync] = getSupportedPlatformInfoFunction
 });
 
 export const [getTotalDiskCapacity, getTotalDiskCapacitySync] = getSupportedPlatformInfoFunctions({
-  supportedPlatforms: ['android', 'ios', 'windows', 'web'],
+  supportedPlatforms: ['android', 'ios', 'windows', 'macos', 'web'],
   getter: () => RNDeviceInfo.getTotalDiskCapacity(),
   syncGetter: () => RNDeviceInfo.getTotalDiskCapacitySync(),
   defaultValue: -1,
@@ -500,7 +505,12 @@ export async function getTotalDiskCapacityOld() {
   if (Platform.OS === 'android') {
     return RNDeviceInfo.getTotalDiskCapacityOld();
   }
-  if (Platform.OS === 'ios' || Platform.OS === 'windows' || Platform.OS === 'web') {
+  if (
+    Platform.OS === 'ios' ||
+    Platform.OS === 'windows' ||
+    Platform.OS === 'macos' ||
+    Platform.OS === 'web'
+  ) {
     return getTotalDiskCapacity();
   }
 
@@ -519,7 +529,7 @@ export function getTotalDiskCapacityOldSync() {
 }
 
 export const [getFreeDiskStorage, getFreeDiskStorageSync] = getSupportedPlatformInfoFunctions({
-  supportedPlatforms: ['android', 'ios', 'windows', 'web'],
+  supportedPlatforms: ['android', 'ios', 'windows', 'macos', 'web'],
   getter: () => RNDeviceInfo.getFreeDiskStorage(),
   syncGetter: () => RNDeviceInfo.getFreeDiskStorageSync(),
   defaultValue: -1,
@@ -529,7 +539,12 @@ export async function getFreeDiskStorageOld() {
   if (Platform.OS === 'android') {
     return RNDeviceInfo.getFreeDiskStorageOld();
   }
-  if (Platform.OS === 'ios' || Platform.OS === 'windows' || Platform.OS === 'web') {
+  if (
+    Platform.OS === 'ios' ||
+    Platform.OS === 'windows' ||
+    Platform.OS === 'macos' ||
+    Platform.OS === 'web'
+  ) {
     return getFreeDiskStorage();
   }
 
@@ -540,7 +555,12 @@ export function getFreeDiskStorageOldSync() {
   if (Platform.OS === 'android') {
     return RNDeviceInfo.getFreeDiskStorageOldSync();
   }
-  if (Platform.OS === 'ios' || Platform.OS === 'windows' || Platform.OS === 'web') {
+  if (
+    Platform.OS === 'ios' ||
+    Platform.OS === 'windows' ||
+    Platform.OS === 'macos' ||
+    Platform.OS === 'web'
+  ) {
     return getFreeDiskStorageSync();
   }
 
@@ -548,7 +568,7 @@ export function getFreeDiskStorageOldSync() {
 }
 
 export const [getBatteryLevel, getBatteryLevelSync] = getSupportedPlatformInfoFunctions({
-  supportedPlatforms: ['android', 'ios', 'windows', 'web'],
+  supportedPlatforms: ['android', 'ios', 'windows', 'macos', 'web'],
   getter: () => RNDeviceInfo.getBatteryLevel(),
   syncGetter: () => RNDeviceInfo.getBatteryLevelSync(),
   defaultValue: -1,
@@ -589,7 +609,7 @@ export const [isAirplaneMode, isAirplaneModeSync] = getSupportedPlatformInfoFunc
 export const getDeviceType = () => {
   return getSupportedPlatformInfoSync({
     memoKey: 'deviceType',
-    supportedPlatforms: ['android', 'ios', 'windows'],
+    supportedPlatforms: ['android', 'ios', 'windows', 'macos'],
     defaultValue: 'unknown',
     getter: () => RNDeviceInfo.deviceType,
   });
@@ -598,7 +618,7 @@ export const getDeviceType = () => {
 export const getDeviceTypeSync = () => {
   return getSupportedPlatformInfoSync({
     memoKey: 'deviceType',
-    supportedPlatforms: ['android', 'ios', 'windows'],
+    supportedPlatforms: ['android', 'ios', 'windows', 'macos'],
     defaultValue: 'unknown',
     getter: () => RNDeviceInfo.deviceType,
   });
@@ -606,7 +626,7 @@ export const getDeviceTypeSync = () => {
 
 export const [supportedAbis, supportedAbisSync] = getSupportedPlatformInfoFunctions({
   memoKey: '_supportedAbis',
-  supportedPlatforms: ['android', 'ios', 'windows'],
+  supportedPlatforms: ['android', 'ios', 'windows', 'macos'],
   getter: () => RNDeviceInfo.getSupportedAbis(),
   syncGetter: () => RNDeviceInfo.getSupportedAbisSync(),
   defaultValue: [] as string[],
@@ -700,7 +720,7 @@ export const [
   getAvailableLocationProviders,
   getAvailableLocationProvidersSync,
 ] = getSupportedPlatformInfoFunctions({
-  supportedPlatforms: ['android', 'ios'],
+  supportedPlatforms: ['android', 'ios', 'macos'],
   getter: () => RNDeviceInfo.getAvailableLocationProviders(),
   syncGetter: () => RNDeviceInfo.getAvailableLocationProvidersSync(),
   defaultValue: {},
@@ -714,7 +734,7 @@ export const [getBrightness, getBrightnessSync] = getSupportedPlatformInfoFuncti
 });
 
 export async function getDeviceToken() {
-  if (Platform.OS === 'ios') {
+  if (Platform.OS === 'ios' || Platform.OS === 'macos') {
     return RNDeviceInfo.getDeviceToken();
   }
   return 'unknown';
